@@ -17,19 +17,23 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
         self.best_tour = [0]
         self.best_distance = float("inf")
         self.best_robot_parameters = [0]
+        self.tour_nodes = [0]
 
     def sort_in(self):
 
         self.robot_parameters.sort(key=lambda x: x['Capacity'], reverse=True)
 
-    def check_robot_capacity(self, a, c):
+    def check_unvisited(self, a, c, mode):
 
         k = []
         for s in c:
             if all(elem in a for elem in s['pick_drop']):
                 continue
             else:
-                k.append(s['total_demand_tour'])
+                if mode == 'demand':
+                    k.append(s['total_demand_tour'])
+                if mode == 'unvisited_nodes':
+                    k.append(s)
         return k
 
     def random_shuffle_(self):
@@ -57,7 +61,7 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
             tour_nodes = []
             for robot in robot_list:
 
-                if robot['Capacity'] < min(self.check_robot_capacity(tour_nodes, pick_drop_list)):
+                if robot['Capacity'] < min(self.check_unvisited(tour_nodes, pick_drop_list, mode='demand')):
                     tour_list.append(None)
                     continue
 
@@ -79,15 +83,19 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
                 self.best_tour = tour_list
                 self.best_distance = round(total_distance, 3)
                 self.best_robot_parameters = robot_list
+                self.tour_nodes = tour_nodes
+
+        univisted_nodes = self.check_unvisited(self.tour_nodes, pick_drop_list, mode='unvisited_nodes')
         print("total distance traveled {}".format(self.best_distance))
         print("best robot sequence parameter {}".format(self.best_robot_parameters))
         print("best tour for all robot based on seq {}".format(self.best_tour))
+        print("unvisited_nodes by the algorithm {}".format(univisted_nodes))
 
 
 if __name__ == '__main__':
     colony_size = 5
     steps = 50
-    robot_parameters = [{'name': 'Captain', 'Capacity': 5}, {'name': 'Cob', 'Capacity': 12},
+    robot_parameters = [{'name': 'Captain', 'Capacity': 5}, {'name': 'Cob', 'Capacity': 9},
                         {'name': 'Davy', 'Capacity': 20}]
     cvrp = CapacityVehicleRoutingPickupDelivery(colony_size, steps, robot_parameters)
     cvrp.main()
