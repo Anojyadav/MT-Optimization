@@ -86,7 +86,7 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
         print("total distance traveled {}".format(self.best_distance))
         print("best robot sequence parameter {}".format(self.best_robot_parameters))
         print("best tour for all robot based on seq {}".format(self.best_tour))
-        print("unvisited_nodes by the algorithm {}".format(univisted_nodes))
+        print("unvisited_nodes by the robots {}".format(univisted_nodes))
 
 
 if __name__ == '__main__':
