@@ -60,11 +60,9 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
             tour_list = []
             tour_nodes = []
             for robot in robot_list:
-
                 if robot['Capacity'] < min(self.check_unvisited(tour_nodes, pick_drop_list, mode='demand')):
                     tour_list.append(None)
                     continue
-
                 else:
                     tour = AntTour(colony_size=self.colony_size, steps=self.steps, nodes_location=nodes_location,
                                    demand_list=demand_list_, robot_capacity=robot['Capacity'],
@@ -78,7 +76,6 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
                             demand_list_[ele] = float('inf')
                     if min(demand_list_[1:]) == float('inf'):
                         break
-
             if total_distance < self.best_distance:
                 self.best_tour = tour_list
                 self.best_distance = round(total_distance, 3)
