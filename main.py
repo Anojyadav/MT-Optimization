@@ -59,7 +59,6 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
 
                 if robot['Capacity'] < min(self.check_robot_capacity(tour_nodes, pick_drop_list)):
                     tour_list.append(None)
-                    tour_nodes.extend([0])
                     continue
 
                 else:
