@@ -54,13 +54,21 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
 
         nodes_location, demand_list, pick_drop_list = self.generate_order_list()
         robot_parameter_list = self.random_shuffle_()
+        self.task_optimization(nodes_location, demand_list, pick_drop_list,robot_parameter_list)
+
+
+    def task_optimization(self,nodes_location,demand_list, pick_drop_list,robot_parameter_list):
+
         for robot_list in robot_parameter_list:
             demand_list_ = copy.deepcopy(demand_list)
             total_distance = 0
             tour_list = []
             tour_nodes = []
             for robot in robot_list:
-                if robot['Capacity'] < min(self.check_unvisited(tour_nodes, pick_drop_list, mode='demand')):
+                unvisited_node_demand = self.check_unvisited(tour_nodes, pick_drop_list, mode='demand')
+                if len(unvisited_node_demand) ==0:
+                    break
+                elif robot['Capacity'] < min(unvisited_node_demand):
                     tour_list.append(None)
                     continue
                 else:
@@ -82,11 +90,15 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
                 self.best_robot_parameters = robot_list
                 self.tour_nodes = tour_nodes
 
-        univisted_nodes = self.check_unvisited(self.tour_nodes, pick_drop_list, mode='unvisited_nodes')
+        unvisted_nodes = self.check_unvisited(self.tour_nodes, pick_drop_list, mode='unvisited_nodes')
         print("total distance traveled {}".format(self.best_distance))
         print("best robot sequence parameter {}".format(self.best_robot_parameters))
         print("best tour for all robot based on seq {}".format(self.best_tour))
-        print("unvisited_nodes by the robots {}".format(univisted_nodes))
+        print("unvisited_nodes by the robots {}".format(unvisted_nodes))
+        if len(unvisted_nodes) != 0:
+            self.task_optimization(nodes_location,demand_list, unvisted_nodes,robot_parameter_list)
+        else:
+            return
 
 
 if __name__ == '__main__':
