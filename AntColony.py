@@ -46,7 +46,10 @@ class AntColony:
                             self.nodes_demand_list[new_node] = float('inf')
                             return new_node
 
-                    elif self.pick_drop_list[i_]['pick_drop'][-1] == new_node and all(elem in self.tour for elem in self.pick_drop_list[i_]['pick_drop'][:-1]):  # self.pick_drop_list[i_][:-1] in self.tour :
+                    elif self.pick_drop_list[i_]['pick_drop'][-1] == new_node and all(elem in self.tour for elem in
+                                                                                      self.pick_drop_list[i_][
+                                                                                          'pick_drop'][
+                                                                                      :-1]):  # self.pick_drop_list[i_][:-1] in self.tour :
                         return new_node
 
     def calculate_heuristic_value(self, node_):
@@ -85,7 +88,8 @@ class AntColony:
         check_list = []
         for j_ in self.tour[1:]:
             for i_ in range(len(self.pick_drop_list)):
-                if j_ in self.pick_drop_list[i_]['pick_drop'][:-1] and all(elem in self.tour for elem in self.pick_drop_list[i_]['pick_drop']):
+                if j_ in self.pick_drop_list[i_]['pick_drop'][:-1] and all(
+                        elem in self.tour for elem in self.pick_drop_list[i_]['pick_drop']):
                     check_list.append(0)
                 elif j_ in self.pick_drop_list[i_]['pick_drop'][:-1] and (
                         all(elem in self.tour for elem in self.pick_drop_list[i_]['pick_drop']) is False):
