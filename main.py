@@ -18,6 +18,8 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
         self.best_distance = float("inf")
         self.best_robot_parameters = [0]
         self.tour_nodes = [0]
+        self.nodes_location = []
+        #self.pick_drop_list = []
 
     def sort_in(self):
 
@@ -50,39 +52,63 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
                     robot_list.append(robot_parameters_)
         return robot_list
 
-    def main(self):
+    def tour(self,robot_list,demand,pick_drop_list):
 
-        nodes_location, demand_list, pick_drop_list = self.generate_order_list()
-        robot_parameter_list = self.random_shuffle_()
-        self.task_optimization(nodes_location, demand_list, pick_drop_list, robot_parameter_list)
+        total_distance = 0
+        tour_list = []
+        tour_nodes = []
+        for robot in range(len(robot_list)):
 
-    def task_optimization(self, nodes_location, demand_list, pick_drop_list, robot_parameter_list):
+            unvisited_node_demand = self.check_unvisited(tour_nodes, pick_drop_list, mode='demand')
+            if len(unvisited_node_demand) == 0:
+                break
+            elif robot_list[robot]['Capacity'] < min(unvisited_node_demand):
+                tour_list.append(None)
+                continue
+            else:
+
+                tour = AntTour(colony_size=self.colony_size, steps=self.steps, nodes_location=self.nodes_location,
+                               demand_list=demand, robot_capacity=robot_list[robot]['Capacity'],
+                               pick_drop_list=pick_drop_list)
+                a, c, d = tour.run()
+                total_distance += round(d, 2)
+                tour_list.append(a)
+                tour_nodes.extend(a)
+                for ele in a:
+                    if ele != 0:
+                        demand[ele] = float('inf')
+                if min(demand[1:]) == float('inf'):
+                    break
+
+        return total_distance,tour_list,tour_nodes
+
+
+    def main(self, mode='Sorting'):
+
+        self.nodes_location, demand_list, pick_drop_list = self.generate_order_list()
+        if mode != 'Sorting':
+            robot_parameter_list = self.random_shuffle_()
+            self.task_optimization_shuffle(demand_list, robot_parameter_list, pick_drop_list)
+        else:
+            self.sort_in()
+            self.task_optimization_sorting(demand_list,pick_drop_list)
+
+
+    def task_optimization_sorting(self,demand_list,pick_drop_list):
+
+
+        best_distance, best_tour , tour_nodes = self.tour(self.robot_parameters, demand_list,pick_drop_list)
+        print("total distance traveled {}".format(round(best_distance,3)))
+        print("best robot sequence parameter {}".format(self.robot_parameters))
+        print("best tour for all robot based on seq {}".format(best_tour))
+
+
+    def task_optimization_shuffle(self, demand_list, robot_parameter_list, pick_drop_list ):
 
         for robot_list in robot_parameter_list:
             demand_list_ = copy.deepcopy(demand_list)
-            total_distance = 0
-            tour_list = []
-            tour_nodes = []
-            for robot in robot_list:
-                unvisited_node_demand = self.check_unvisited(tour_nodes, pick_drop_list, mode='demand')
-                if len(unvisited_node_demand) == 0:
-                    break
-                elif robot['Capacity'] < min(unvisited_node_demand):
-                    tour_list.append(None)
-                    continue
-                else:
-                    tour = AntTour(colony_size=self.colony_size, steps=self.steps, nodes_location=nodes_location,
-                                   demand_list=demand_list_, robot_capacity=robot['Capacity'],
-                                   pick_drop_list=pick_drop_list)
-                    a, c, d = tour.run()
-                    total_distance += round(d, 2)
-                    tour_list.append(a)
-                    tour_nodes.extend(a)
-                    for ele in a:
-                        if ele != 0:
-                            demand_list_[ele] = float('inf')
-                    if min(demand_list_[1:]) == float('inf'):
-                        break
+            total_distance,tour_list,tour_nodes = self.tour(robot_list, demand_list_ , pick_drop_list)
+
             if total_distance < self.best_distance:
                 self.best_tour = tour_list
                 self.best_distance = round(total_distance, 3)
@@ -95,7 +121,7 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
         print("best tour for all robot based on seq {}".format(self.best_tour))
         print("unvisited_nodes by the robots {}".format(unvisted_nodes))
         if len(unvisted_nodes) != 0:
-            self.task_optimization(nodes_location, demand_list, unvisted_nodes, robot_parameter_list)
+            self.task_optimization_shuffle(demand_list, robot_parameter_list, unvisted_nodes)
         else:
             return
 
@@ -103,7 +129,7 @@ class CapacityVehicleRoutingPickupDelivery(GenerateOrderList):
 if __name__ == '__main__':
     colony_size = 5
     steps = 50
-    robot_parameters = [{'name': 'Captain', 'Capacity': 5}, {'name': 'Cob', 'Capacity': 9},
-                        {'name': 'Davy', 'Capacity': 20}]
+    robot_parameters = [{'name': 'Captain', 'Capacity': 15}, {'name': 'Cob', 'Capacity': 30},
+                        {'name': 'Davy', 'Capacity': 30}]
     cvrp = CapacityVehicleRoutingPickupDelivery(colony_size, steps, robot_parameters)
-    cvrp.main()
+    cvrp.main(mode = 'Sorting')
