@@ -12,7 +12,7 @@ class GenerateOrderList:
         self.demand_list = []
         self.nodes_location = []
         self.pick_drop_list = []
-        file_location = "station.yaml"
+        file_location = "Order_2.yaml"
         with open(file_location, 'r') as f:
             self.order_dict = yaml.safe_load(f)
 
