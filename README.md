@@ -10,7 +10,7 @@ Each tour total demand must not exceed the robot capacity.
 All the pick-up that has to be dropped to a particular deposit location should be picked by the same robot in other words should be present in the tour. 
 
 
-Defining each Module 
+Defining each Module:
 
 Order_2/station.yaml – This is yaml file containing the information about the location, pick and drop nodes and demands 
 
